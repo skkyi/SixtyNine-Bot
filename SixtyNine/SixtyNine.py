@@ -1,7 +1,23 @@
 import discord
 from discord.ext import commands, tasks
 import itertools
+from flask import Flask
+from threading import Thread
 import os
+
+# خادم وهمي عشان يخلي Render يعطينا Live
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "I am alive!"
+
+def run_flask():
+    app.run(host='0.0.0.0', port=10000)
+
+def keep_alive():
+    t = Thread(target=run_flask)
+    t.start()
 
 # إعدادات الصلاحيات
 intents = discord.Intents.default()
@@ -10,17 +26,15 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# هنا الكود بيسحب التوكن من إعدادات الموقع اللي بنضيفها
+# الأمر السري: هنا الكود يسحب التوكن من إعدادات الموقع مو من الكود
 TOKEN = os.environ.get('BOT_TOKEN')
 
-# قائمة الكلمات للحالة المتغيرة (الستاتس)
 status_list = itertools.cycle([
     "طلال مداح",
     "Div By : @.skyi",
     "Sixty Nine"
 ])
 
-# وظيفة تغيير الحالة كل 4 ثواني
 @tasks.loop(seconds=4)
 async def change_status():
     await bot.change_presence(activity=discord.Game(name=next(status_list)))
@@ -37,12 +51,8 @@ async def on_member_join(member):
     if channel:
         await channel.send(f"Welcome {member.mention} to Sixty Nine")
 
-# تشغيل البوت
 if TOKEN:
+    keep_alive()
     bot.run(TOKEN)
 else:
     print("خطأ: لم يتم العثور على BOT_TOKEN في إعدادات Render!")
-
-# تشغيل البوت
-bot.run(TOKEN)
-
