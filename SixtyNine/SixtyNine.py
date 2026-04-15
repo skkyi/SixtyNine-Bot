@@ -5,40 +5,36 @@ from flask import Flask
 from threading import Thread
 import os
 
-# --- كود خادم وهمي عشان Render ما يطفي البوت ---
+# --- خادم وهمي لاستمرار التشغيل ---
 app = Flask('')
 
 @app.route('/')
 def home():
-    return "I am alive!"
+    return "Bot is Online!"
 
 def run_flask():
-    app.run(host='0.0.0.0', port=10000)
+    # المنصات تعطي المنفذ تلقائياً عبر PORT، وإذا لم يوجد نستخدم 8080
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
 
 def keep_alive():
     t = Thread(target=run_flask)
     t.start()
-# ---------------------------------------------
 
-# إعدادات الصلاحيات
+# --- إعدادات البوت ---
 intents = discord.Intents.default()
 intents.members = True 
 intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# --- حركة تقسيم التوكن (عشان ما ينحرق) ---
-# سوي Reset Token في ديسكورد وخذ الجديد وقسمه هنا:
-P1 = "MTQ5Mzc2ODY2NTA3MjY2ODY5Mg"  # حط الجزء الأول هنا
-P2 = "GMiL_X"                    # حط الجزء الثاني هنا
-P3 = "q8HTpKmwIYUhatEhFxoIGVro6COtwTyHDvzbBc" # حط الجزء الأخير هنا
-
-TOKEN = f"{P1}.{P2}.{P3}"
+# جلب التوكن من "Environment Variables" (أكثر أماناً)
+TOKEN = os.environ.get("BOT_TOKEN")
 
 # قائمة الحالة المتغيرة
 status_list = itertools.cycle([
     "طلال مداح",
-    "Div By : @.skyi",
+    "Dev By : @.skyi",
     "Sixty Nine"
 ])
 
@@ -52,20 +48,19 @@ async def on_ready():
     if not change_status.is_running():
         change_status.start()
 
-# --- وظيفة الترحيب في روم hye ---
 @bot.event
 async def on_member_join(member):
+    # يبحث عن روم باسم hye
     channel = discord.utils.get(member.guild.text_channels, name="hye")
     if channel:
         await channel.send(f"Welcome {member.mention} to Sixty Nine")
-    else:
-        print(f"تنبيه: لم أجد روم باسم hye للترحيب بـ {member.name}")
 
-# --- تشغيل البوت ---
 if __name__ == "__main__":
-    print("جاري محاولة تشغيل البوت...")
     keep_alive()
-    try:
-        bot.run(TOKEN)
-    except Exception as e:
-        print(f"خطأ أثناء تشغيل البوت: {e}")
+    if TOKEN:
+        try:
+            bot.run(TOKEN)
+        except Exception as e:
+            print(f"Error: {e}")
+    else:
+        print("خطأ: لم يتم العثور على BOT_TOKEN في الإعدادات!")
