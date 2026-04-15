@@ -10,7 +10,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "Bot is Online!"
+    return "Bot is Online and Dev By @.skyi !"
 
 def run_flask():
     # المنصات تعطي المنفذ تلقائياً عبر PORT، وإذا لم يوجد نستخدم 8080
@@ -28,10 +28,10 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# جلب التوكن من "Environment Variables" (أكثر أماناً)
-TOKEN = os.environ.get("BOT_TOKEN")
+# جلب التوكن من "Secrets" في Replit
+TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
 
-# قائمة الحالة المتغيرة
+# قائمة الحالة المتغيرة (تم تعديل الغلط هنا ✅)
 status_list = itertools.cycle([
     "طلال مداح",
     "Dev By : @.skyi",
@@ -50,7 +50,7 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    # يبحث عن روم باسم hye
+    # يبحث عن روم باسم hye للترحيب
     channel = discord.utils.get(member.guild.text_channels, name="hye")
     if channel:
         await channel.send(f"Welcome {member.mention} to Sixty Nine")
@@ -63,4 +63,4 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Error: {e}")
     else:
-        print("خطأ: لم يتم العثور على BOT_TOKEN في الإعدادات!")
+        print("خطأ: لم يتم العثور على التوكن!")
